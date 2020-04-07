@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-python world_language_model/main.py --cuda &
+python word_language_model/main.py --cuda &
 python mnist/main.py 
 python mnist/main.py 
 
