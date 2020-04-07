@@ -228,8 +228,6 @@ try:
         else:
             # Anneal the learning rate if no improvement has been seen in the validation dataset.
             lr /= 4.0
-time_elapsed = time.time() - since
-print("NLP Using ",time_elapsed, " s")
 
 
 
@@ -252,6 +250,8 @@ print('=' * 89)
 print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
     test_loss, math.exp(test_loss)))
 print('=' * 89)
+time_elapsed = time.time() - since
+print("NLP Using ",time_elapsed, " s")
 
 if len(args.onnx_export) > 0:
     # Export the model in ONNX format.
