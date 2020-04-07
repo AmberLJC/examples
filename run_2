@@ -1,0 +1,7 @@
+
+#!/bin/bash
+python imagenet/main.py 
+python mnist/main.py &
+python mnist/main.py 
+
+
