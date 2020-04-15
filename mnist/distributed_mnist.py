@@ -102,6 +102,8 @@ def main():
     parser.add_argument('--init-method', type=str, default='tcp://10.10.1.2:23456')
     parser.add_argument('--rank', type=int, default=1)
     parser.add_argument('--world-size',type=int, default=0)
+    parser.add_argument('--no-cuda', action='store_true', default=False,
+                        help='disables CUDA training')
     
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -122,23 +124,24 @@ def main():
                        transforms.Normalize((0.1307,), (0.3081,))
                    ]))
     # 分发数据
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    #train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset,args.world_size,rank=args.rank)
+    # train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset,args.world_size,rank=args.rank)
         
     kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
     
-    #train_loader = torch.utils.data.DataLoader(train_dataset,shuffle=(train_sampler is None),\
-    #                                           sampler=train_sampler,batch_size=args.batch_size, **kwargs)
-    train_loader = torch.utils.data.DataLoader(train_dataset,drop_last=True,batch_size=int(args.batch_size), **kwargs)
+    train_loader = torch.utils.data.DataLoader(train_dataset,shuffle=(train_sampler is None),\
+                                               sampler=train_sampler,batch_size=args.batch_size, **kwargs)
+    # train_loader = torch.utils.data.DataLoader(train_dataset,drop_last=True,batch_size=int(args.batch_size), **kwargs)
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('data', train=False, transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+    model = Net().to(device)
     
-    
-    model = Net()
     if args.cuda:
         # 分发模型
         model.cuda()
@@ -165,7 +168,7 @@ def main():
         tot_time+=end_cpu_secs - start_cpu_secs
         test(model,args,test_loader)
     
-    print("Distribute on {} workers use = {:.3f}s".format(args.world-size, tot_time))
+    print("Distribute on {} workers use = {:.3f}s".format(args.world_size, tot_time))
     
     
     dist.destroy_process_group()
