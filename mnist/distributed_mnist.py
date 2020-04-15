@@ -100,8 +100,8 @@ def main():
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
     parser.add_argument('--init-method', type=str, default='tcp://10.10.1.2:23456')
-    parser.add_argument('--rank', type=int, default=1)
-    parser.add_argument('--world-size',type=int, default=0)
+    parser.add_argument('--rank', type=int, default=0)
+    parser.add_argument('--world-size',type=int, default=1)
     
     
     args = parser.parse_args()
