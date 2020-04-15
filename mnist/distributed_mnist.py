@@ -145,8 +145,8 @@ def main():
     if args.cuda:
         # 分发模型
         #model.cuda()
-        #model = torch.nn.parallel.DistributedDataParallel(model, device_ids =args.rank)
-        model = torch.nn.DataParallel(model,device_ids=args.rank).cuda()
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids =args.rank)
+        #model = torch.nn.DataParallel(model,device_ids=args.rank ).cuda()
         model.cuda()
         print("DistributedDataParallel GPU")
     else:
