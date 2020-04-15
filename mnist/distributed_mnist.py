@@ -45,7 +45,7 @@ class Net(nn.Module):
         return F.log_softmax(x,dim=0)
 
 
-def train(epoch):
+def train(epoch,model,optimizer,args,train_loader):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         if args.cuda:
@@ -61,7 +61,7 @@ def train(epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.data))
 
-def test():
+def test(model,args,test_loader):
     model.eval()
     test_loss = 0
     correct = 0
@@ -153,19 +153,19 @@ def main():
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     
     tot_time=0;
-    
+
     for epoch in range(1, args.epochs + 1):
         train_sampler.set_epoch(epoch)
         start_cpu_secs = time.time()
         #long running
-        train(epoch)
+        train(epoch,model,optimizer,args,train_loader)
         end_cpu_secs = time.time()
         print("Epoch {} of {} took {:.3f}s".format(
             epoch , args.epochs , end_cpu_secs - start_cpu_secs))
         tot_time+=end_cpu_secs - start_cpu_secs
-        test()
+        test(model,args,test_loader)
     
-    print("Total time= {:.3f}s".format(tot_time))
+    print("Distribute on {} workers use = {:.3f}s".format(args.world-size, tot_time))
     
     
     dist.destroy_process_group()
