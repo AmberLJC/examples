@@ -87,7 +87,7 @@ def main():
     
     parser.add_argument('--batch-size', type=int, default=256, metavar='N',
                         help='input batch size for training (default: 64)')
-    parser.add_argument('--epochs', type=int, default=20, metavar='N',
+    parser.add_argument('--epochs', type=int, default=5, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
@@ -99,17 +99,19 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--init-method', type=str, default='tcp://10.10.1.2:23456')
+    parser.add_argument('--init-method', type=str, default='tcp://128.105.144.51:23456')
     parser.add_argument('--rank', type=int, default=0)
     parser.add_argument('--world-size',type=int, default=1)
     
+    parser.add_argument('--test-batch-size', type=int, default=256, metavar='N',
+                    help='input batch size for testing (default: 1000)')
     
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     
     #初始化
     
-    dist.init_process_group(init_method=args.init_method,timeout=timedelta(seconds=1800), \
+    dist.init_process_group(init_method=args.init_method,timeout=timedelta(seconds=1000), \
                             backend="gloo", world_size=args.world_size,rank=args.rank,group_name="pytorch_test")
     #dist.init_process_group(init_method='tcp://10.10.1.2:23256',backend="gloo", world_size=1,rank=0,group_name="pytorch_test")
     
