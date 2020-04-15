@@ -102,8 +102,7 @@ def main():
     parser.add_argument('--init-method', type=str, default='tcp://10.10.1.2:23456')
     parser.add_argument('--rank', type=int, default=1)
     parser.add_argument('--world-size',type=int, default=0)
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
+    
     
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -138,16 +137,15 @@ def main():
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
-    model = Net().to(device)
-    
+    # device = torch.device("cuda" if use_cuda else "cpu")
+    model = Net() 
+    print("Discover {} GPU".format(torch.cuda.device_count()))
     if args.cuda:
         # 分发模型
+        #model.cuda()
+        #model = torch.nn.parallel.DistributedDataParallel(model, device_ids =args.rank)
+        model = torch.nn.DataParallel(model,device_ids=args.rank).cuda()
         model.cuda()
-        model = torch.nn.parallel.DistributedDataParallel(model)
-        # model = torch.nn.DataParallel(model,device_ids=[0,1,2,3]).cuda()
-        # model.cuda()
         print("DistributedDataParallel GPU")
     else:
         print("DistributedDataParallel CPU")
