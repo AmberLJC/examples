@@ -60,6 +60,7 @@ def train(args):
     gram_style = [utils.gram_matrix(y) for y in features_style]
 
     for e in range(args.epochs):
+        start_time = time.time()
         transformer.train()
         agg_content_loss = 0.
         agg_style_loss = 0.
@@ -92,7 +93,7 @@ def train(args):
 
             agg_content_loss += content_loss.item()
             agg_style_loss += style_loss.item()
-
+            '''
             if (batch_id + 1) % args.log_interval == 0:
                 mesg = "{}\tEpoch {}:\t[{}/{}]\tcontent: {:.6f}\tstyle: {:.6f}\ttotal: {:.6f}".format(
                     time.ctime(), e + 1, count, len(train_dataset),
@@ -100,15 +101,19 @@ def train(args):
                                   agg_style_loss / (batch_id + 1),
                                   (agg_content_loss + agg_style_loss) / (batch_id + 1)
                 )
-                print(mesg)
-
+               print(mesg)
+            '''
+        
             if args.checkpoint_model_dir is not None and (batch_id + 1) % args.checkpoint_interval == 0:
                 transformer.eval().cpu()
                 ckpt_model_filename = "ckpt_epoch_" + str(e) + "_batch_id_" + str(batch_id + 1) + ".pth"
                 ckpt_model_path = os.path.join(args.checkpoint_model_dir, ckpt_model_filename)
                 torch.save(transformer.state_dict(), ckpt_model_path)
                 transformer.to(device).train()
-
+        print('-' * 70)
+        print('| end of epoch {:3d} | time: {:5.2f}s |'.format(e, (time.time() - start_time)))
+        print('-' * 70)
+                
     # save model
     transformer.eval().cpu()
     save_model_filename = "epoch_" + str(args.epochs) + "_" + str(time.ctime()).replace(' ', '_') + "_" + str(
@@ -228,13 +233,14 @@ def main():
     if args.cuda and not torch.cuda.is_available():
         print("ERROR: cuda is not available, try running on CPU")
         sys.exit(1)
+    since = time.time()
 
     if args.subcommand == "train":
         check_paths(args)
         train(args)
     else:
         stylize(args)
-
+    print("Fast nerual Using ",time.time() - since, " s")
 
 if __name__ == "__main__":
     main()
